@@ -80,7 +80,7 @@ export default function Index() {
   const outputRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const isValidKey = apiKey.startsWith("sk-ant");
+  const isValidKey = apiKey.startsWith("gsk_");
 
   // Auto-collapse helper when valid key entered
   useEffect(() => {
@@ -165,7 +165,7 @@ export default function Index() {
       return;
     }
     if (!apiKey.trim()) {
-      toast({ title: "Please enter your Anthropic API key", variant: "destructive" });
+      toast({ title: "⚠️ Please enter your Groq API key first!", variant: "destructive" });
       return;
     }
 
@@ -173,20 +173,21 @@ export default function Index() {
     setOutput("");
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "llama-3.3-70b-versatile",
           max_tokens: 4096,
-          system: SYSTEM_PROMPT,
           stream: true,
           messages: [
+            {
+              role: "system",
+              content: SYSTEM_PROMPT,
+            },
             {
               role: "user",
               content: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}`,
@@ -219,8 +220,9 @@ export default function Index() {
           if (json === "[DONE]") break;
           try {
             const parsed = JSON.parse(json);
-            if (parsed.type === "content_block_delta" && parsed.delta?.text) {
-              fullOutput += parsed.delta.text;
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullOutput += delta;
               setOutput(fullOutput);
             }
           } catch {
@@ -328,13 +330,13 @@ export default function Index() {
 
         {/* API Key */}
         <div className="fade-up fade-up-delay-1 mb-6">
-          <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Anthropic API Key</label>
+          <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Groq API Key</label>
           <div className="relative">
             <input
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-ant-..."
+              placeholder="gsk_..."
               className="w-full rounded-lg border border-input bg-card px-4 py-2.5 pr-10 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
             />
             {isValidKey && (
@@ -344,7 +346,9 @@ export default function Index() {
           <p className="mt-2 text-xs text-muted-foreground">
             Your key is never stored or sent anywhere.
             <br />
-            Don't have a key? Follow these steps to get one free:
+            Get a free key at{" "}
+            <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">console.groq.com</a>
+            {" "}— no credit card needed!
           </p>
           <button
             onClick={() => setShowKeyHelp(!showKeyHelp)}
@@ -354,7 +358,7 @@ export default function Index() {
           </button>
           {showKeyHelp && (
             <ol className="mt-2 ml-4 list-decimal text-xs text-muted-foreground space-y-1">
-              <li>Go to <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">console.anthropic.com</a> and sign up</li>
+              <li>Go to <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">console.groq.com</a> and sign up</li>
               <li>Click "API Keys" in the left sidebar</li>
               <li>Click "Create Key", name it anything, and hit create</li>
               <li>Copy the key immediately — it's only shown once!</li>
