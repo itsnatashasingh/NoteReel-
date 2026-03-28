@@ -237,19 +237,9 @@ const MODEL = "openrouter/auto";
     };
 
     try {
-      await streamModel(PRIMARY_MODEL);
+      await streamModel(MODEL);
     } catch (e: any) {
-      if (e?.is429) {
-        toast({ title: "Primary model rate-limited, switching to fallback..." });
-        setOutput("");
-        try {
-          await streamModel(FALLBACK_MODEL);
-        } catch (e2: any) {
-          toast({ title: "Generation failed", description: e2.message, variant: "destructive" });
-        }
-      } else {
-        toast({ title: "Generation failed", description: e.message, variant: "destructive" });
-      }
+      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
