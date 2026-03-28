@@ -197,9 +197,6 @@ const MODEL = "openrouter/auto";
         }
       );
 
-      if (res.status === 429) {
-        throw { is429: true };
-      }
       if (!res.ok) {
         const err = await res.text();
         throw new Error(`API error ${res.status}: ${err}`);
