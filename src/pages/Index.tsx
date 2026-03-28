@@ -174,35 +174,39 @@ export default function Index() {
 
 const MODEL = "openrouter/auto";
 
-    const streamModel = async (model: string) => {
-      const res = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`,
-            "HTTP-Referer": window.location.origin,
-            "X-Title": "NoteReel",
-          },
-          body: JSON.stringify({
-            model,
-            stream: true,
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              { role: "user", content: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}` },
-            ],
-            max_tokens: 4096,
-          }),
-        }
-      );
+    const requestBody = {
+      model: MODEL,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}` },
+      ],
+      max_tokens: 4096,
+    };
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      "HTTP-Referer": window.location.origin,
+      "X-Title": "NoteReel",
+    };
+
+    const tryStreaming = async () => {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...requestBody, stream: true }),
+      });
 
       if (!res.ok) {
         const err = await res.text();
         throw new Error(`API error ${res.status}: ${err}`);
       }
 
-      const reader = res.body!.getReader();
+      if (!res.body) {
+        throw new Error("NO_STREAM_SUPPORT");
+      }
+
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
       let fullOutput = "";
@@ -231,12 +235,42 @@ const MODEL = "openrouter/auto";
           }
         }
       }
+
+      if (!fullOutput) {
+        throw new Error("NO_STREAM_SUPPORT");
+      }
+    };
+
+    const tryNonStreaming = async () => {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...requestBody, stream: false }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`API error ${res.status}: ${err}`);
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || "";
+      if (!content) throw new Error("No content in response");
+      setOutput(content);
     };
 
     try {
-      await streamModel(MODEL);
-    } catch (e: any) {
-      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+      await tryStreaming();
+    } catch (streamErr: any) {
+      if (streamErr.message === "NO_STREAM_SUPPORT") {
+        try {
+          await tryNonStreaming();
+        } catch (e: any) {
+          toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+        }
+      } else {
+        toast({ title: "Generation failed", description: streamErr.message, variant: "destructive" });
+      }
     } finally {
       setLoading(false);
     }
