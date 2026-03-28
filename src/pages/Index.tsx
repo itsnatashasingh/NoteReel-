@@ -173,20 +173,21 @@ export default function Index() {
     setOutput("");
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "llama-3.3-70b-versatile",
           max_tokens: 4096,
-          system: SYSTEM_PROMPT,
           stream: true,
           messages: [
+            {
+              role: "system",
+              content: SYSTEM_PROMPT,
+            },
             {
               role: "user",
               content: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}`,
