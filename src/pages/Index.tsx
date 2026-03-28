@@ -255,7 +255,7 @@ export default function Index() {
         doc.text(line, 20, y);
         y += 7;
       }
-      doc.save("LectureLens-notes.pdf");
+      doc.save("NoteReel-notes.pdf");
       toast({ title: "PDF downloaded! 📄" });
     } catch {
       toast({ title: "Failed to generate PDF", variant: "destructive" });
