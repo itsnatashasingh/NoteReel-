@@ -172,8 +172,7 @@ export default function Index() {
     setLoading(true);
     setOutput("");
 
-    const PRIMARY_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
-    const FALLBACK_MODEL = "mistralai/mistral-7b-instruct:free";
+const MODEL = "openrouter/auto";
 
     const streamModel = async (model: string) => {
       const res = await fetch(
@@ -198,9 +197,6 @@ export default function Index() {
         }
       );
 
-      if (res.status === 429) {
-        throw { is429: true };
-      }
       if (!res.ok) {
         const err = await res.text();
         throw new Error(`API error ${res.status}: ${err}`);
@@ -238,19 +234,9 @@ export default function Index() {
     };
 
     try {
-      await streamModel(PRIMARY_MODEL);
+      await streamModel(MODEL);
     } catch (e: any) {
-      if (e?.is429) {
-        toast({ title: "Primary model rate-limited, switching to fallback..." });
-        setOutput("");
-        try {
-          await streamModel(FALLBACK_MODEL);
-        } catch (e2: any) {
-          toast({ title: "Generation failed", description: e2.message, variant: "destructive" });
-        }
-      } else {
-        toast({ title: "Generation failed", description: e.message, variant: "destructive" });
-      }
+      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
