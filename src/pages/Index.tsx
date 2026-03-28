@@ -173,28 +173,29 @@ export default function Index() {
     setOutput("");
 
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          max_tokens: 4096,
-          stream: true,
-          messages: [
-            {
-              role: "system",
-              content: SYSTEM_PROMPT,
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: SYSTEM_PROMPT }],
             },
-            {
-              role: "user",
-              content: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}`,
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}` }],
+              },
+            ],
+            generationConfig: {
+              maxOutputTokens: 4096,
             },
-          ],
-        }),
-      });
+          }),
+        }
+      );
 
       if (!res.ok) {
         const err = await res.text();
@@ -220,7 +221,7 @@ export default function Index() {
           if (json === "[DONE]") break;
           try {
             const parsed = JSON.parse(json);
-            const delta = parsed.choices?.[0]?.delta?.content;
+            const delta = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
             if (delta) {
               fullOutput += delta;
               setOutput(fullOutput);
