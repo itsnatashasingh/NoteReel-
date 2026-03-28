@@ -165,7 +165,7 @@ export default function Index() {
       return;
     }
     if (!apiKey.trim()) {
-      toast({ title: "⚠️ Please enter your Groq API key first!", variant: "destructive" });
+      toast({ title: "⚠️ Please enter your Google Gemini API key first!", variant: "destructive" });
       return;
     }
 
