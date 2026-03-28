@@ -14,7 +14,7 @@ function loadScript(src: string, id: string): Promise<void> {
   });
 }
 
-const SYSTEM_PROMPT = `You are LectureLens, an intelligent study assistant that transforms documents,
+const SYSTEM_PROMPT = `You are NoteReel, an intelligent study assistant that transforms documents,
 PDFs, and text into engaging notes that feel like a YouTube study video transcript.
 Your job is to read any document the user provides and produce output that mimics
 the tone, structure, and energy of a popular educational YouTube video — think
@@ -255,7 +255,7 @@ export default function Index() {
         doc.text(line, 20, y);
         y += 7;
       }
-      doc.save("LectureLens-notes.pdf");
+      doc.save("NoteReel-notes.pdf");
       toast({ title: "PDF downloaded! 📄" });
     } catch {
       toast({ title: "Failed to generate PDF", variant: "destructive" });
@@ -302,7 +302,7 @@ export default function Index() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
               🔍
             </div>
-            <h1 className="font-display text-xl font-bold text-foreground">LectureLens</h1>
+            <h1 className="font-display text-xl font-bold text-foreground">NoteReel</h1>
           </div>
           <button
             onClick={() => setDark(!dark)}
