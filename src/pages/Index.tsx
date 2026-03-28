@@ -74,9 +74,20 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [showKeyHelp, setShowKeyHelp] = useState(false);
+  
   const fileRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const isValidKey = apiKey.startsWith("sk-ant");
+
+  // Auto-collapse helper when valid key entered
+  useEffect(() => {
+    if (isValidKey) {
+      setShowKeyHelp(false);
+    }
+  }, [isValidKey]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -318,13 +329,38 @@ export default function Index() {
         {/* API Key */}
         <div className="fade-up fade-up-delay-1 mb-6">
           <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Anthropic API Key</label>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-ant-..."
-            className="w-full rounded-lg border border-input bg-card px-4 py-2.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
-          />
+          <div className="relative">
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="sk-ant-..."
+              className="w-full rounded-lg border border-input bg-card px-4 py-2.5 pr-10 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+            />
+            {isValidKey && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">✅</span>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Your key is never stored or sent anywhere.
+            <br />
+            Don't have a key? Follow these steps to get one free:
+          </p>
+          <button
+            onClick={() => setShowKeyHelp(!showKeyHelp)}
+            className="mt-1 text-xs font-medium text-primary hover:underline"
+          >
+            {showKeyHelp ? "Hide steps ↑" : "How do I get a key? →"}
+          </button>
+          {showKeyHelp && (
+            <ol className="mt-2 ml-4 list-decimal text-xs text-muted-foreground space-y-1">
+              <li>Go to <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">console.anthropic.com</a> and sign up</li>
+              <li>Click "API Keys" in the left sidebar</li>
+              <li>Click "Create Key", name it anything, and hit create</li>
+              <li>Copy the key immediately — it's only shown once!</li>
+              <li>Paste it in the box above and you're ready 🎉</li>
+            </ol>
+          )}
         </div>
 
         {/* Input Tabs */}
