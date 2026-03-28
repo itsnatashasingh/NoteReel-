@@ -172,7 +172,10 @@ export default function Index() {
     setLoading(true);
     setOutput("");
 
-    try {
+    const PRIMARY_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
+    const FALLBACK_MODEL = "google/gemini-2.0-flash-exp:free";
+
+    const streamModel = async (model: string) => {
       const res = await fetch(
         "https://openrouter.ai/api/v1/chat/completions",
         {
@@ -184,7 +187,7 @@ export default function Index() {
             "X-Title": "NoteReel",
           },
           body: JSON.stringify({
-            model: "meta-llama/llama-3.3-70b-instruct:free",
+            model,
             stream: true,
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
@@ -195,6 +198,9 @@ export default function Index() {
         }
       );
 
+      if (res.status === 429) {
+        throw { is429: true };
+      }
       if (!res.ok) {
         const err = await res.text();
         throw new Error(`API error ${res.status}: ${err}`);
@@ -229,8 +235,22 @@ export default function Index() {
           }
         }
       }
+    };
+
+    try {
+      await streamModel(PRIMARY_MODEL);
     } catch (e: any) {
-      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+      if (e?.is429) {
+        toast({ title: "Primary model rate-limited, switching to fallback..." });
+        setOutput("");
+        try {
+          await streamModel(FALLBACK_MODEL);
+        } catch (e2: any) {
+          toast({ title: "Generation failed", description: e2.message, variant: "destructive" });
+        }
+      } else {
+        toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+      }
     } finally {
       setLoading(false);
     }
