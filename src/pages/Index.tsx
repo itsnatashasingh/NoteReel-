@@ -174,25 +174,23 @@ export default function Index() {
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+        "https://openrouter.ai/api/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "NoteReel",
           },
           body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: SYSTEM_PROMPT }],
-            },
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}` }],
-              },
+            model: "meta-llama/llama-3.3-70b-instruct:free",
+            stream: true,
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              { role: "user", content: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}` },
             ],
-            generationConfig: {
-              maxOutputTokens: 4096,
-            },
+            max_tokens: 4096,
           }),
         }
       );
