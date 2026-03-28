@@ -468,7 +468,7 @@ export default function Index() {
             className="w-full rounded-lg bg-primary py-3.5 font-display font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
             style={loading ? { animation: "pulse-glow 2s infinite" } : {}}
           >
-            {loading ? "🔍 Generating..." : "🔍 Generate Study Notes"}
+            {loading ? "🎬 Generating..." : "🎬 Generate Study Notes"}
           </button>
         </div>
 
