@@ -300,7 +300,7 @@ export default function Index() {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
-              🔍
+              🎬
             </div>
             <h1 className="font-display text-xl font-bold text-foreground">NoteReel</h1>
           </div>
