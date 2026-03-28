@@ -74,9 +74,20 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [showKeyHelp, setShowKeyHelp] = useState(false);
+  const [keyCollapsed, setKeyCollapsed] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const isValidKey = apiKey.startsWith("sk-ant");
+
+  // Auto-collapse helper when valid key entered
+  useEffect(() => {
+    if (isValidKey) {
+      setShowKeyHelp(false);
+    }
+  }, [isValidKey]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
