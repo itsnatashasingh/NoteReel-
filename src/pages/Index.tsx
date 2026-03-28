@@ -80,7 +80,7 @@ export default function Index() {
   const outputRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const isValidKey = apiKey.startsWith("sk-ant");
+  const isValidKey = apiKey.startsWith("gsk_");
 
   // Auto-collapse helper when valid key entered
   useEffect(() => {
