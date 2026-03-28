@@ -220,8 +220,9 @@ export default function Index() {
           if (json === "[DONE]") break;
           try {
             const parsed = JSON.parse(json);
-            if (parsed.type === "content_block_delta" && parsed.delta?.text) {
-              fullOutput += parsed.delta.text;
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullOutput += delta;
               setOutput(fullOutput);
             }
           } catch {
