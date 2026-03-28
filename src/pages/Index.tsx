@@ -172,8 +172,7 @@ export default function Index() {
     setLoading(true);
     setOutput("");
 
-    const PRIMARY_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
-    const FALLBACK_MODEL = "mistralai/mistral-7b-instruct:free";
+const MODEL = "openrouter/auto";
 
     const streamModel = async (model: string) => {
       const res = await fetch(
