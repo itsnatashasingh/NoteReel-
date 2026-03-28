@@ -80,7 +80,7 @@ export default function Index() {
   const outputRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const isValidKey = apiKey.startsWith("gsk_");
+  const isValidKey = apiKey.startsWith("AIza");
 
   // Auto-collapse helper when valid key entered
   useEffect(() => {
@@ -165,7 +165,7 @@ export default function Index() {
       return;
     }
     if (!apiKey.trim()) {
-      toast({ title: "⚠️ Please enter your Groq API key first!", variant: "destructive" });
+      toast({ title: "⚠️ Please enter your Google Gemini API key first!", variant: "destructive" });
       return;
     }
 
@@ -173,28 +173,29 @@ export default function Index() {
     setOutput("");
 
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          max_tokens: 4096,
-          stream: true,
-          messages: [
-            {
-              role: "system",
-              content: SYSTEM_PROMPT,
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: SYSTEM_PROMPT }],
             },
-            {
-              role: "user",
-              content: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}`,
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: `Style: ${STYLE_CONTEXT[style]}\n\nHere is the document to transform:\n\n${text}` }],
+              },
+            ],
+            generationConfig: {
+              maxOutputTokens: 4096,
             },
-          ],
-        }),
-      });
+          }),
+        }
+      );
 
       if (!res.ok) {
         const err = await res.text();
@@ -220,7 +221,7 @@ export default function Index() {
           if (json === "[DONE]") break;
           try {
             const parsed = JSON.parse(json);
-            const delta = parsed.choices?.[0]?.delta?.content;
+            const delta = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
             if (delta) {
               fullOutput += delta;
               setOutput(fullOutput);
@@ -330,13 +331,13 @@ export default function Index() {
 
         {/* API Key */}
         <div className="fade-up fade-up-delay-1 mb-6">
-          <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Groq API Key</label>
+          <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Google Gemini API Key</label>
           <div className="relative">
             <input
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="gsk_..."
+              placeholder="AIza..."
               className="w-full rounded-lg border border-input bg-card px-4 py-2.5 pr-10 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
             />
             {isValidKey && (
@@ -347,7 +348,7 @@ export default function Index() {
             Your key is never stored or sent anywhere.
             <br />
             Get a free key at{" "}
-            <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">console.groq.com</a>
+            <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">aistudio.google.com</a>
             {" "}— no credit card needed!
           </p>
           <button
@@ -358,10 +359,10 @@ export default function Index() {
           </button>
           {showKeyHelp && (
             <ol className="mt-2 ml-4 list-decimal text-xs text-muted-foreground space-y-1">
-              <li>Go to <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">console.groq.com</a> and sign up</li>
-              <li>Click "API Keys" in the left sidebar</li>
-              <li>Click "Create Key", name it anything, and hit create</li>
-              <li>Copy the key immediately — it's only shown once!</li>
+              <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">aistudio.google.com</a> and sign in with Google</li>
+              <li>Click "Get API key" in the left sidebar</li>
+              <li>Click "Create API key" and select a project</li>
+              <li>Copy the key immediately!</li>
               <li>Paste it in the box above and you're ready 🎉</li>
             </ol>
           )}
