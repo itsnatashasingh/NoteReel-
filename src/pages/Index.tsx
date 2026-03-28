@@ -219,7 +219,7 @@ export default function Index() {
           if (json === "[DONE]") break;
           try {
             const parsed = JSON.parse(json);
-            const delta = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            const delta = parsed.choices?.[0]?.delta?.content;
             if (delta) {
               fullOutput += delta;
               setOutput(fullOutput);
