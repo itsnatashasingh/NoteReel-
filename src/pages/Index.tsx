@@ -165,7 +165,7 @@ export default function Index() {
       return;
     }
     if (!apiKey.trim()) {
-      toast({ title: "Please enter your Anthropic API key", variant: "destructive" });
+      toast({ title: "⚠️ Please enter your Groq API key first!", variant: "destructive" });
       return;
     }
 
