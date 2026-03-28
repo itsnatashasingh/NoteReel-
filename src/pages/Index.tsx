@@ -75,7 +75,7 @@ export default function Index() {
   const [fileName, setFileName] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [showKeyHelp, setShowKeyHelp] = useState(false);
-  const [keyCollapsed, setKeyCollapsed] = useState(false);
+  
   const fileRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
