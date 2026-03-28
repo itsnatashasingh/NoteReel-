@@ -302,7 +302,7 @@ export default function Index() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
               🔍
             </div>
-            <h1 className="font-display text-xl font-bold text-foreground">LectureLens</h1>
+            <h1 className="font-display text-xl font-bold text-foreground">NoteReel</h1>
           </div>
           <button
             onClick={() => setDark(!dark)}
