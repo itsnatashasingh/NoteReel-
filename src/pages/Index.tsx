@@ -173,7 +173,7 @@ export default function Index() {
     setOutput("");
 
     const PRIMARY_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
-    const FALLBACK_MODEL = "google/gemini-flash-1.5:free";
+    const FALLBACK_MODEL = "mistralai/mistral-7b-instruct:free";
 
     const streamModel = async (model: string) => {
       const res = await fetch(
