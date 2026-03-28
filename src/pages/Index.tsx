@@ -80,7 +80,7 @@ export default function Index() {
   const outputRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const isValidKey = apiKey.startsWith("AIza");
+  const isValidKey = apiKey.startsWith("sk-or-");
 
   // Auto-collapse helper when valid key entered
   useEffect(() => {
