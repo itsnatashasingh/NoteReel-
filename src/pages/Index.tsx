@@ -75,6 +75,7 @@ export default function Index() {
   const [fileName, setFileName] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [showKeyHelp, setShowKeyHelp] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   
   const fileRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
