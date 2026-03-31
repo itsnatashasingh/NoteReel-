@@ -76,6 +76,7 @@ export default function Index() {
   const [dragOver, setDragOver] = useState(false);
   const [showKeyHelp, setShowKeyHelp] = useState(false);
   const [extracting, setExtracting] = useState(false);
+  const [extractingMsg, setExtractingMsg] = useState("");
   
   const fileRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
@@ -99,7 +100,7 @@ export default function Index() {
     document.documentElement.classList.add("dark");
   }, []);
 
-  const extractPdf = useCallback(async (file: File) => {
+  const extractPdfNative = useCallback(async (file: File) => {
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", "pdfjs");
     const w = window as any;
     w.pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -112,8 +113,53 @@ export default function Index() {
       const content = await page.getTextContent();
       result += content.items.map((item: any) => item.str).join(" ") + "\n\n";
     }
+    return { text: result.trim(), pdf };
+  }, []);
+
+  const extractPdfOcr = useCallback(async (pdf: any) => {
+    setExtractingMsg("📷 Detected image-based PDF, running OCR...");
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js", "tesseract");
+    const w = window as any;
+    const worker = await w.Tesseract.createWorker("eng");
+    let result = "";
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      setExtractingMsg(`📷 OCR processing page ${i} of ${pdf.numPages}...`);
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2 });
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const { data: { text } } = await worker.recognize(canvas);
+      result += text + "\n\n";
+    }
+
+    await worker.terminate();
     return result.trim();
   }, []);
+
+  const extractPdf = useCallback(async (file: File) => {
+    setExtractingMsg("📄 Extracting text...");
+    const { text, pdf } = await extractPdfNative(file);
+
+    if (text.length >= 50) {
+      return text;
+    }
+
+    // Fallback to OCR
+    try {
+      const ocrText = await extractPdfOcr(pdf);
+      if (ocrText && ocrText.trim().length > 0) {
+        return ocrText;
+      }
+    } catch (ocrErr) {
+      console.error("OCR failed:", ocrErr);
+    }
+
+    return text; // return whatever we got
+  }, [extractPdfNative, extractPdfOcr]);
 
   const extractWord = useCallback(async (file: File) => {
     await loadScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js", "mammoth");
@@ -135,7 +181,7 @@ export default function Index() {
           }
           const extracted = await extractPdf(file);
           if (!extracted || !extracted.trim()) {
-            toast({ title: "Could not extract text from this PDF. It may be a scanned image.", variant: "destructive" });
+            toast({ title: "Could not extract text. Try copying and pasting the text manually using the Paste Text tab.", variant: "destructive" });
             return;
           }
           setText(extracted);
@@ -158,6 +204,7 @@ export default function Index() {
         toast({ title: "Failed to extract text from file", description: err?.message || "Unknown error", variant: "destructive" });
       } finally {
         setExtracting(false);
+        setExtractingMsg("");
       }
     },
     [tab, extractPdf, extractWord, toast]
@@ -525,7 +572,7 @@ const MODEL = "openrouter/auto";
             className="w-full rounded-lg bg-primary py-3.5 font-display font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
             style={loading ? { animation: "pulse-glow 2s infinite" } : {}}
           >
-            {extracting ? "📄 Extracting text..." : loading ? "🎬 Generating..." : "🎬 Generate Study Notes"}
+            {extracting ? (extractingMsg || "📄 Extracting text...") : loading ? "🎬 Generating..." : "🎬 Generate Study Notes"}
           </button>
           {!loading && !extracting && (!text.trim() || !apiKey.trim()) && (
             <p className="mt-2 text-center text-xs text-muted-foreground">
