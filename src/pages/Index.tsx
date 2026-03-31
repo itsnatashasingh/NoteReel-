@@ -204,6 +204,7 @@ export default function Index() {
         toast({ title: "Failed to extract text from file", description: err?.message || "Unknown error", variant: "destructive" });
       } finally {
         setExtracting(false);
+        setExtractingMsg("");
       }
     },
     [tab, extractPdf, extractWord, toast]
