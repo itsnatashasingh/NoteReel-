@@ -572,7 +572,7 @@ const MODEL = "openrouter/auto";
             className="w-full rounded-lg bg-primary py-3.5 font-display font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
             style={loading ? { animation: "pulse-glow 2s infinite" } : {}}
           >
-            {extracting ? "📄 Extracting text..." : loading ? "🎬 Generating..." : "🎬 Generate Study Notes"}
+            {extracting ? (extractingMsg || "📄 Extracting text...") : loading ? "🎬 Generating..." : "🎬 Generate Study Notes"}
           </button>
           {!loading && !extracting && (!text.trim() || !apiKey.trim()) && (
             <p className="mt-2 text-center text-xs text-muted-foreground">
