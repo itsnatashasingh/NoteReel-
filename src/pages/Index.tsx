@@ -125,6 +125,8 @@ export default function Index() {
   const handleFile = useCallback(
     async (file: File) => {
       setFileName(file.name);
+      setExtracting(true);
+      setText("");
       try {
         if (tab === "pdf") {
           if (!file.name.toLowerCase().endsWith(".pdf")) {
@@ -132,19 +134,30 @@ export default function Index() {
             return;
           }
           const extracted = await extractPdf(file);
+          if (!extracted || !extracted.trim()) {
+            toast({ title: "Could not extract text from this PDF. It may be a scanned image.", variant: "destructive" });
+            return;
+          }
           setText(extracted);
-          toast({ title: "PDF extracted successfully" });
+          toast({ title: `PDF extracted successfully — ${extracted.split(/\s+/).length} words` });
         } else {
           if (!/\.(docx?)$/i.test(file.name)) {
             toast({ title: "Please upload a Word document (.doc/.docx)", variant: "destructive" });
             return;
           }
           const extracted = await extractWord(file);
+          if (!extracted || !extracted.trim()) {
+            toast({ title: "Could not extract text from this document.", variant: "destructive" });
+            return;
+          }
           setText(extracted);
           toast({ title: "Word doc extracted successfully" });
         }
-      } catch {
-        toast({ title: "Failed to extract text from file", variant: "destructive" });
+      } catch (err: any) {
+        console.error("File extraction error:", err);
+        toast({ title: "Failed to extract text from file", description: err?.message || "Unknown error", variant: "destructive" });
+      } finally {
+        setExtracting(false);
       }
     },
     [tab, extractPdf, extractWord, toast]
