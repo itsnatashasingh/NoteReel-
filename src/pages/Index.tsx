@@ -181,7 +181,7 @@ export default function Index() {
           }
           const extracted = await extractPdf(file);
           if (!extracted || !extracted.trim()) {
-            toast({ title: "Could not extract text from this PDF. It may be a scanned image.", variant: "destructive" });
+            toast({ title: "Could not extract text. Try copying and pasting the text manually using the Paste Text tab.", variant: "destructive" });
             return;
           }
           setText(extracted);
